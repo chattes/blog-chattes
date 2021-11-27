@@ -1,0 +1,32 @@
+.blog-header {
+  background-color: black;
+  color: whitesmoke;
+  height: 7vh;
+  margin-bottom: 10px;
+}
+
+.blog-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.913);
+  color: rgba(245, 245, 245, 0.646);
+  height: 4vh;
+}
+.blog-title:hover {
+  color: rgba(245, 245, 245, 0.708);
+  cursor: pointer;
+}
+
+.blog-navigation-title:hover {
+  color: white;
+}
+
+.post-tile {
+  cursor: pointer;
+  border-bottom: grey 0.5px solid;
+}
+
+.post-excerpt {
+  max-width: 80vw;
+}
