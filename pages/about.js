@@ -12,13 +12,25 @@ export default function Home() {
           </p>
           <p>
             Curently I program primarily using{" "}
-            <a href="https://nodejs.org/en/">NodeJS</a> and{" "}
-            <a href="https://reactjs.org/">React</a>. They are my goto stack
-            when I try to experiment and build something new.
+            <a href="https://nodejs.org/en/" target="_blank">
+              NodeJS
+            </a>{" "}
+            and{" "}
+            <a href="https://reactjs.org/" target="_blank">
+              React
+            </a>
+            . They are my goto stack when I try to experiment and build
+            something new.
           </p>
           <p>
-            I have also programmed in <a href="https://go.dev/">golang</a> and
-            tried a little bit of <a href="https://elixir-lang.org/">Elixir</a>{" "}
+            I have also programmed in{" "}
+            <a href="https://go.dev/" target="_blank">
+              golang
+            </a>{" "}
+            and tried a little bit of{" "}
+            <a href="https://elixir-lang.org/" target="_blank">
+              Elixir
+            </a>{" "}
             in the past.
           </p>
           <p>
