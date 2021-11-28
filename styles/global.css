@@ -4,6 +4,9 @@
   height: 7vh;
   margin-bottom: 10px;
 }
+.blog-name {
+  cursor: pointer;
+}
 
 .blog-footer {
   position: fixed;
@@ -15,10 +18,10 @@
 }
 .blog-title:hover {
   color: rgba(245, 245, 245, 0.708);
-  cursor: pointer;
 }
 
 .blog-navigation-title:hover {
+  cursor: pointer;
   color: white;
 }
 

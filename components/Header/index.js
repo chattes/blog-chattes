@@ -4,7 +4,7 @@ const Header = () => {
     <header className="d-flex align-items-center justify-content-center blog-header">
       <Link href="/">
         <div className="d-flex flex-row">
-          <h2 className="">Tech Stacked</h2>
+          <h2 className="blog-name">Tech Stacked</h2>
           <small className="text-muted p-2">by Sourav Chatterjee</small>
         </div>
       </Link>
