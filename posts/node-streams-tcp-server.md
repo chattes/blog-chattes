@@ -23,7 +23,7 @@ Node Streams gives us the ability to send data in chunks to the server instead o
 Also stream have built in support to handle **Backpressure**.
 When a **Backpressure** is applied the consumer(server) basically notifies the producer(server), that it is currently overloaded and stream takes care not to send more data to the server.
 
-![Slow Server](/public/images/posts/StreamSlowFast.png)
+![Slow Server](/images/posts/StreamSlowFast.png)
 
 Let's check how this works with a code example.
 
