@@ -133,12 +133,11 @@ Let's take a look into what we are doing here
 That is all for the **producer/client** side of things.
 
 We will take a look at the Server Next !
+<br/>
 
 ### Consumer/Slow Server
 
 <br />
-<br />
-
 In the server we want to parse the binary data received in chunks in the correct order and then process them, we will simulate the processing using a `promise` which will block the server for sometime.
 
 ```javascript
