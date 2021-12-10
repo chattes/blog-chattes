@@ -282,9 +282,13 @@ Also as expected if we run the server and then the client we can see the memory 
 The complete code is available [here](https://github.com/chattes/node-streaming-server/tree/main/stream-pipes)
 
 <a href="https://www.loom.com/share/2905396a01cb4db596c2bd5c4dbaef7d">
-    <p>iTerm2 - Souravs-MacBook-Pro-2 ❐ 9 ● 1 zsh - 10 December 2021 - Watch Video</p>
+    <p>Streaming Server and Client - Watch Video</p>
     <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/2905396a01cb4db596c2bd5c4dbaef7d-with-play.gif">
   </a>
 
-**More Reading**
-[backpressure 2](https://nodejs.org/es/docs/guides/backpressuring-in-streams/)
+<br />
+<br />
+
+## More Reading
+
+[NodeJS Streams Backpressure](https://nodejs.org/es/docs/guides/backpressuring-in-streams/)
