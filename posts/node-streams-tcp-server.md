@@ -23,7 +23,7 @@ Node Streams gives us the ability to send data in chunks to the server instead o
 Also stream have built in support to handle **Backpressure**.
 When a **Backpressure** is applied the consumer(server) basically notifies the producer(server), that it is currently overloaded and stream takes care not to send more data to the server.
 
-![Slow Server](/images/posts/StreamSlowFast.png)
+<a href="https://ibb.co/5LLzGwp"><img src="https://i.ibb.co/4ppDK3v/Stream-Slow-Fast.png" alt="Stream-Slow-Fast" border="0"></a>
 
 Let's check how this works with a code example.
 
@@ -139,10 +139,153 @@ We will take a look at the Server Next !
 <br />
 <br />
 
-**References**
+In the server we want to parse the binary data received in chunks in the correct order and then process them, we will simulate the processing using a `promise` which will block the server for sometime.
 
-[backpressure blog](https://www.derpturkey.com/node-js-socket-backpressure-in-paused-mode-2/)
+```javascript
+const server = http.createServer((req, res) => {
+  let dataToProcess = [];
+  let jsonReader = new JSONReader();
+  const flushAndProcess = () => {
+    return new Promise((resolve) => {
+      if (dataToProcess.length % 10000 === 0) {
+        setTimeout(() => {
+          console.log("Flushing Data and Processing");
+          dataToProcess = [];
+          resolve();
+        }, 3000);
+      } else {
+        resolve();
+      }
+    });
+  };
+  jsonReader.JSONEmitter.on("json", (jsonData) => dataToProcess.push(jsonData));
+  req.on("close", () => console.log("Closed"));
+  req.on("end", () => {
+    console.log("Request End.. Data processed", jsonReader.parsedJSONCounter);
+    res.end();
+  });
+  // req.on("data", (chunk) => console.log("data", chunk.toString()));
+  req.on("readable", async () => {
+    await flushAndProcess();
+    jsonReader.makeJSONFromStream(req);
+  });
+});
+server.listen(3000, () => {
+  setInterval(() => {
+    console.log("rss", process.memoryUsage().rss / 1024 / 1024);
+  }, 1000);
+  console.log("Listening on 3000");
+});
+```
+
+Above , we create a the Server and then listen for the `readable` event on the **req** stream.
+For streams we have
+
+- Flowing Mode and
+- Paused mode
+
+When we listen to the `readable` event we are basically reading the stream in paused mode, this gives us better control in reading the incoming data of the stream.
+
+If we wanted the stream to be in flowing mode we would have listened to the `data` event.
+
+Whenever a chunk of data is available in our buffers the readable event will be raised and we would then read the data from the Buffers and do something with it.
+
+In this case we have a helper class <br/>
+`let jsonReader = new JSONReader();`
+which will process bytes of data and then store it in a temporary array.
+
+Whenever our temporary array has 10000 records we start processing the data and basically that pauses the stream.<br />
+
+```javascript
+await flushAndProcess();
+```
+
+Lets look at how we can process the binary data and process it into valid JSON.
+
+```javascript
+class JSONReader {
+  bytesToRead = 0;
+  chunks = [];
+  parsedJSONCounter = 0;
+  JSONEmitter;
+
+  constructor() {
+    this.JSONEmitter = new EventEmitter();
+  }
+
+  setBytestoRead(len) {
+    this.bytesToRead = len;
+  }
+  reset() {
+    this.bytesToRead = 0;
+    this.chunks = [];
+  }
+  parseJSON() {
+    try {
+      let buffer = Buffer.concat(this.chunks);
+      let parsedJSON = JSON.parse(buffer);
+      this.parsedJSONCounter++;
+      return parsedJSON;
+    } catch (error) {
+      console.error("Error parsing JSON String", error);
+    }
+  }
+
+  readBytes(inStream) {
+    let body = inStream.read(this.bytesToRead);
+
+    if (body) {
+      this.chunks.push(body);
+      const jsonData = this.parseJSON();
+      this.reset();
+      this.JSONEmitter.emit("json", jsonData);
+      return;
+    }
+
+    body = inStream.read();
+    if (!body) return;
+    this.chunks.push(body);
+    this.bytesToRead = this.bytesToRead - Buffer.byteLength(body);
+  }
+
+  makeJSONFromStream(inStream) {
+    if (this.bytesToRead > 0) {
+      this.readBytes(inStream);
+    }
+    let lenBytes;
+    while (null !== (lenBytes = inStream.read(4))) {
+      this.bytesToRead = lenBytes.readUInt32BE();
+      this.readBytes(inStream);
+    }
+  }
+}
+```
+
+- Read the first 4 bytes of the stream and get the length of the JSON payload(the length was set in the client).
+- Read the length of data from the stream <br />
+  `let body = inStream.read(this.bytesToRead);`
+
+- We need to keep in mind, that for larger payloads , the whole payload might not yet have been received. In that case we simply read all the data of the buffer, calculate the length of bytes read and decrement that amount from the total length of the payload. <br />
+  ` this.bytesToRead = this.bytesToRead - Buffer.byteLength(body);`
+- When the next chunk arrives we read the rest of the remaining length of the buffer and continue this process , till we have read the complete valid payload.
+- Once the payload has been completely read we convert the data to a valid json and store it in our internal array.
+
+As in the client/producer side we keep track of the memory consumption in the server.
+
+Finally we listen to the `end` event of the stream in which case we can just respond to the caller that request has been processed and a response is sent.
+
+### Final Thoughts
+
+The above experiment gives us an idea of how we can handle different sizes of requests with Streams in NodeJS.
+It also showcases one way of handling servers which might auto throttle using built in NodeJS streams and backpressure.
+Also as expected if we run the server and then the client we can see the memory footprint of both system is pretty much kept low during the whole process.
+
+The complete code is available [here](https://github.com/chattes/node-streaming-server/tree/main/stream-pipes)
+
+<a href="https://www.loom.com/share/2905396a01cb4db596c2bd5c4dbaef7d">
+    <p>iTerm2 - Souravs-MacBook-Pro-2 ❐ 9 ● 1 zsh - 10 December 2021 - Watch Video</p>
+    <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/2905396a01cb4db596c2bd5c4dbaef7d-with-play.gif">
+  </a>
+
+**More Reading**
 [backpressure 2](https://nodejs.org/es/docs/guides/backpressuring-in-streams/)
-
-[streams](https://www.derpturkey.com/extending-tcp-socket-in-node-js/)
-[tcpsocket](https://www.derpturkey.com/extending-tcp-socket-in-node-js/)
